@@ -15,6 +15,7 @@ apps_v1 = client.AppsV1Api()
 
 # Environment variables
 container_name = os.getenv('IMAGE_CHECKER_WATCH_CONTAINER')
+registry_url = os.getenv('IMAGE_CHECKER_REGISTRY_URL', 'https://registry.hub.docker.com/v2/repositories').rstrip('/')
 
 if not container_name:
     raise ValueError("Environment variable 'IMAGE_CHECKER_WATCH_CONTAINER' is not set.")
@@ -98,7 +99,7 @@ def get_docker_hub_url(deployment_name, namespace):
     if "/" not in repo_image:
         repo_image = f"library/{repo_image}"  # Assume "library" namespace for official images
 
-    return f"https://registry.hub.docker.com/v2/repositories/{repo_image}/tags/{tag}"
+    return f"{registry_url}/{repo_image}/tags/{tag}"
 
 namespace = get_current_namespace()
 pod_name = get_current_pod_name()
