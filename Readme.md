@@ -1,6 +1,6 @@
-# image-checker 
+# Kubernetes Pod Reloaded
 
-A python script and container to dynamically check pod image digest against a remote and restart the pod if different. 
+A python script and container to dynamically check a pods container image digest against a remote image digest, and restart the pod if different. 
 
 
 
