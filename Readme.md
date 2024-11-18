@@ -1,31 +1,37 @@
 # image-checker 
 
-### A container to dynamically check pod image digest against a remote and 
+A python script and container to dynamically check pod image digest against a remote and restart the pod if different. 
 
-# Configuration 
+
+
+## Configuration 
+
+#### 
+- ImagePullPolicy must be set to always
+- The container must be running as a sidecar container to the pod you wish to watch for changes.
 
 ### Required ENV Vars 
+- Set to inform the watcher container which container to watch
 
-Set to inform the watcher container which container to watch
 ```
 IMAGE_CHECKER_WATCH_CONTAINER="container-name-in-pod"
 ```
 
-Optional
+Optional env vars 
 - set a different container image repo url if not using dockerhub: 
+
 ```
-CHECKER_REGISTRY_URL="https://domain.com"
+IMAGE_CHECKER_REGISTRY_URL="https://domain.com"
 ```
 
 ## Development 
 ```
-docker build --platform linux/amd64 -t jgriffin555/manifest-image-checker:latest . --push
+docker build --platform linux/amd64 -t repo/image-checker:latest . --push
 ```
 
-
 ## Kubernetes Configuration 
-
 Mount the container into a pod you wish to watch with a service account containing the necessary permissions:
+
 ```
 ---
 apiVersion: v1

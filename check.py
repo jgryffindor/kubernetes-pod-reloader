@@ -139,7 +139,7 @@ while True:
     except Exception as e:
         logging.error(f"Unexpected error: {e}")
     finally:
-        time.sleep(300)  # Check every 5 minutes
+        time.sleep(60)  # Check every 5 minutes
         
         
         
