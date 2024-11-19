@@ -101,20 +101,43 @@ def get_docker_hub_url(deployment_name, namespace):
 
     return f"{registry_url}/{repo_image}/tags/{tag}"
 
+def is_deployment_healthy(deployment_name, namespace):
+    """
+    Checks if the deployment is healthy by ensuring all pods are running and have passed their liveness checks.
+    """
+    deployment = apps_v1.read_namespaced_deployment(deployment_name, namespace)
+    selector = get_deployment_selector(deployment_name, namespace)
+    pods = core_v1.list_namespaced_pod(namespace, label_selector=selector)
+    
+    for pod in pods.items:
+        if pod.status.phase != "Running":
+            logging.warning(f"Pod {pod.metadata.name} is not running.")
+            return False
+        for container_status in pod.status.container_statuses:
+            if not container_status.ready:
+                logging.warning(f"Container {container_status.name} in pod {pod.metadata.name} is not ready.")
+                return False
+    return True
+
 namespace = get_current_namespace()
 pod_name = get_current_pod_name()
 deployment_name = get_deployment_name_from_pod(pod_name, namespace)
 
 while True:
     try:
+        if not is_deployment_healthy(deployment_name, namespace):
+            logging.warning(f"Deployment {deployment_name} is not healthy. Skipping check.")
+            time.sleep(60)
+            continue
+          
         logging.info(f"Checking image digest for deployment: {deployment_name}")
         docker_hub_url = get_docker_hub_url(deployment_name, namespace)
-        logging.info(f"Docker Hub URL: {docker_hub_url}")
+        logging.info(f"Remote image URL: {docker_hub_url}")
 
         # Get the latest digest from Docker Hub
         response = requests.get(docker_hub_url)
         response.raise_for_status()
-        latest_digest = response.json()["images"][0]["digest"]
+        latest_digest = response.json()["digest"]
         
         # Get deployment selector and find the running pod
         deployment_selector = get_deployment_selector(deployment_name, namespace)
